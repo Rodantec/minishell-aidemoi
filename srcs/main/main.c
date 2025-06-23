@@ -193,7 +193,7 @@ void	process_line(char *line, t_env *envp)
 	{
 		int	pipeline_result;
 
-		pipeline_result = execute_pipeline(pipeline, envp);
+		pipeline_result = execute_pipeline(pipeline, envp, tokens);
 		if (pipeline_result != -1)
 		{
 			g_global.exit_status = pipeline_result;

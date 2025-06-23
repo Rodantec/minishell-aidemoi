@@ -33,7 +33,7 @@ t_token	*create_command_token(t_command *cmd)
 	return (token);
 }
 
-void	execute_external_command(t_command *cmd, t_env *envp, t_token *token)
+void	execute_external_command(t_command *cmd, t_env *envp, t_token *token, t_pipeline *pipeline, t_token *token_lexer)
 {
 	char	*path;
 
@@ -44,7 +44,9 @@ void	execute_external_command(t_command *cmd, t_env *envp, t_token *token)
 		ft_putendl_fd(cmd->args[0], STDERR_FILENO);
 		free_cmd(cmd);
 		free_tokens(&token);
+		free_tokens(&token_lexer);
 		free_env(envp);
+		free_pipeline(pipeline);
 		exit(127) ;
 	}
 	execve(path, cmd->args, envp->env);
@@ -65,7 +67,7 @@ void	setup_command_io(t_pipeline *pipeline, int cmd_index, int *saved_fds)
 }
 
 void	handle_builtin_execution(t_command *cmd, t_env *envp,
-	t_pipeline *pipeline, t_token *token)
+	t_pipeline *pipeline, t_token *token, t_token *token_lexer)
 {
 	int	builtin_result;
 
@@ -80,11 +82,11 @@ void	handle_builtin_execution(t_command *cmd, t_env *envp,
 	}
 	if (pipeline && pipeline->pipes)
 		close_pipes(pipeline->pipes, pipeline->cmd_count);
-	execute_external_command(cmd, envp, token);
+	execute_external_command(cmd, envp, token, pipeline, token_lexer);
 }
 
 void	execute_pipeline_command(t_command *cmd, int cmd_index,
-	t_pipeline *pipeline, t_env *envp)
+	t_pipeline *pipeline, t_env *envp, t_token *token_lexer)
 {
 	t_token	*token;
 	int		saved_fds[2];
@@ -111,7 +113,7 @@ void	execute_pipeline_command(t_command *cmd, int cmd_index,
 			close_pipes(pipeline->pipes, pipeline->cmd_count);
 		exit(1);
 	}
-	handle_builtin_execution(cmd, envp, pipeline, token);
+	handle_builtin_execution(cmd, envp, pipeline, token, token_lexer);
 	free_pipeline(pipeline);
 	free_cmd(cmd);
 }

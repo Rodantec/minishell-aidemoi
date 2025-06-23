@@ -83,7 +83,7 @@ int	wait_for_children(t_pipeline *pipeline, pid_t *pids)
 	return (last_status);
 }
 
-int	execute_pipeline(t_pipeline *pipeline, t_env *envp)
+int	execute_pipeline(t_pipeline *pipeline, t_env *envp, t_token *token_lexer)
 {
 	pid_t	*pids;
 	int		i;
@@ -100,7 +100,7 @@ int	execute_pipeline(t_pipeline *pipeline, t_env *envp)
 		{
 			free(pids);
 			execute_pipeline_command(pipeline->commands[i],
-				i, pipeline, envp);
+				i, pipeline, envp, token_lexer);
 		}
 		i++;
 	}

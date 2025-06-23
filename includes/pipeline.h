@@ -27,9 +27,9 @@ void		setup_pipes(int **pipes, int cmd_index, int cmd_count);
 /* pipeline_utils2.c */
 t_token		*create_command_token(t_command *cmd);
 void		execute_external_command(t_command *cmd,
-				t_env *envp, t_token *token);
+				t_env *envp, t_token *token, t_pipeline *pipeline, t_token *token_lexer);
 void		execute_pipeline_command(t_command *cmd, int cmd_index,
-				t_pipeline *pipeline, t_env *envp);
+				t_pipeline *pipeline, t_env *envp, t_token *token_lexer);
 
 /* pipeline_utils3.c */
 int			count_commands(t_token *tokens);
@@ -47,6 +47,6 @@ t_pipeline	*create_pipeline(t_token *tokens);
 int			init_pipeline_execution(t_pipeline *pipeline, pid_t **pids);
 int			handle_fork_error(t_pipeline *pipeline, pid_t *pids, int i);
 int			wait_for_children(t_pipeline *pipeline, pid_t *pids);
-int			execute_pipeline(t_pipeline *pipeline, t_env *envp);
+int			execute_pipeline(t_pipeline *pipeline, t_env *envp, t_token *token_lexer);
 
 #endif 
