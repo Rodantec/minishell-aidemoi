@@ -1,0 +1,186 @@
+# Suppressions pour les fuites de mémoire de readline
+# Ces fuites sont normales et proviennent de la bibliothèque readline
+
+{
+   readline_malloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   obj:*/libreadline.so*
+}
+
+{
+   readline_realloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:*realloc*
+   ...
+   obj:*/libreadline.so*
+}
+
+{
+   readline_strdup
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:strdup
+   ...
+   obj:*/libreadline.so*
+}
+
+{
+   readline_xmalloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:xmalloc
+   ...
+   obj:*/libreadline.so*
+}
+
+{
+   readline_xrealloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:xrealloc
+   ...
+   obj:*/libreadline.so*
+}
+
+{
+   readline_init
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:rl_initialize
+}
+
+{
+   readline_prompt
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:rl_set_prompt
+}
+
+{
+   readline_expand
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:rl_expand_prompt
+}
+
+{
+   readline_locale
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_rl_reset_locale
+}
+
+{
+   readline_region_color
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_rl_reset_region_color
+}
+
+{
+   readline_terminal_io
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_rl_init_terminal_io
+}
+
+{
+   readline_parse_bind
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:rl_parse_and_bind
+}
+
+{
+   ncurses_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   obj:*/libtinfo.so*
+}
+
+{
+   ncurses_setupterm
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_nc_setupterm
+}
+
+{
+   ncurses_trim_sgr0
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_nc_trim_sgr0
+}
+
+{
+   ncurses_home_terminfo
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_nc_home_terminfo
+}
+
+{
+   ncurses_first_db
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_nc_first_db
+}
+
+{
+   ncurses_read_entry
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_nc_read_entry2
+}
+
+{
+   ncurses_tiparm
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_nc_tiparm
+}
+
+{
+   ncurses_doalloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_nc_doalloc
+}
+
+{
+   tgetent_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:tgetent_sp
+}
+
+{
+   tsearch_leaks
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:tsearch
+}
