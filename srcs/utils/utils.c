@@ -10,8 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
-#include "../includes/built_in.h"
+#include "../../includes/minishell.h"
 
 char	*ft_strjoin3(char *s1, char *s2, char *s3)
 {

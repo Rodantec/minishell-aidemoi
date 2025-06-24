@@ -10,8 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/exec.h"
-#include "minishell.h"
+#include "../../includes/minishell.h"
 
 void	run_child_process(t_token *token, t_env *env)
 {
@@ -27,6 +26,24 @@ void	run_child_process(t_token *token, t_env *env)
 	execute_cmd(token, env);
 	perror("Error");
 	exit(1);
+}
+
+static void	process_child_status(int status, pid_t pid)
+{
+	if (WIFSIGNALED(status))
+	{
+		if (WTERMSIG(status) == SIGINT)
+			g_global.exit_status = 130;
+		else if (WTERMSIG(status) == SIGQUIT)
+			g_global.exit_status = 131;
+	}
+	else if (WIFSTOPPED(status))
+	{
+		printf("\n[%d]+  Stopped\t\t%s\n", pid, "command");
+		g_global.exit_status = 0;
+	}
+	else
+		g_global.exit_status = WEXITSTATUS(status);
 }
 
 void	first_child(t_token *token, t_env *env)
@@ -49,18 +66,5 @@ void	first_child(t_token *token, t_env *env)
 	setup_interactive_signals();
 	g_global.child_pid = 0;
 	g_global.shell_status = 0;
-	if (WIFSIGNALED(status))
-	{
-		if (WTERMSIG(status) == SIGINT)
-			g_global.exit_status = 130;
-		else if (WTERMSIG(status) == SIGQUIT)
-			g_global.exit_status = 131;
-	}
-	else if (WIFSTOPPED(status))
-	{
-		printf("\n[%d]+  Stopped\t\t%s\n", pid, "command");
-		g_global.exit_status = 0;
-	}
-	else
-		g_global.exit_status = WEXITSTATUS(status);
+	process_child_status(status, pid);
 }

@@ -88,7 +88,8 @@ int	contains_redirection(t_token *tokens)
 	return (count);
 }
 
-int	handle_redirections(t_token *token, t_env *env, t_token *token_lexer, t_pipeline *pipeline)
+int	handle_redirections(t_token *token, t_env *env,
+	t_token *token_lexer, t_pipeline *pipeline)
 {
 	int		stdin_backup;
 	int		stdout_backup;
@@ -103,11 +104,10 @@ int	handle_redirections(t_token *token, t_env *env, t_token *token_lexer, t_pipe
 	{
 		if (is_redirection(current))
 		{
-			if (apply_single_redirection(current, env, token_lexer, pipeline) == -1)
+			if (apply_single_redirection(current,
+					env, token_lexer, pipeline) == -1)
 				return (restore_file_descriptors(stdin_backup, stdout_backup),
 					-1);
-			if (current->next)
-				current = current->next;
 			current = current->next;
 		}
 		else

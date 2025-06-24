@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
-#include "../../includes/pipeline.h"
 
 int	count_commands(t_token *tokens)
 {

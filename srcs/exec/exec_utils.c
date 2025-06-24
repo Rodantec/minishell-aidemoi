@@ -1,28 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pwd.c                                              :+:      :+:    :+:   */
+/*   exec_utils.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rodantec <rodantec@student.s19.be>         +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/28 10:11:50 by rodantec          #+#    #+#             */
-/*   Updated: 2025/05/28 10:11:50 by rodantec         ###   ########.fr       */
+/*   Created: 2025/01/27 00:00:00 by rodantec          #+#    #+#             */
+/*   Updated: 2025/06/24 15:20:59 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-int	pwd(void)
+char	**get_path_cut(t_env *env)
 {
-	char	*cwd;
+	int		i;
+	char	**pathcut;
 
-	cwd = getcwd(NULL, 0);
-	if (!cwd)
-	{
-		perror("pwd");
-		return (1);
-	}
-	printf("%s\n", cwd);
-	free(cwd);
-	return (0);
+	i = 0;
+	while (env->env[i] && ft_strnstr(env->env[i], "PATH=", 5) == NULL)
+		i++;
+	if (!env->env[i])
+		return (NULL);
+	pathcut = ft_split(env->env[i] + 5, ':');
+	return (pathcut);
 }

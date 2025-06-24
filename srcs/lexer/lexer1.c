@@ -12,24 +12,6 @@
 
 #include "../../includes/minishell.h"
 
-char	*extract_and_expand_word(char *input, int start, int end, int should_expand)
-{
-	char			*word;
-	char			*processed_word;
-	extern t_global	g_global;
-
-	word = ft_substr(input, start, end - start);
-	if (!word)
-		return (NULL);
-	if (should_expand)
-	{
-		processed_word = process_quotes_and_expand(word, g_global.env);
-		free(word);
-		return (processed_word);
-	}
-	return (word);
-}
-
 int	create_word_token(char *word, t_token **tokens)
 {
 	t_token	*token;
@@ -49,24 +31,28 @@ int	create_word_token(char *word, t_token **tokens)
 	return (0);
 }
 
+static int	get_expansion_flag(t_token **tokens)
+{
+	t_token	*last_token;
+
+	last_token = *tokens;
+	while (last_token && last_token->next)
+		last_token = last_token->next;
+	if (last_token && last_token->type == TOKEN_HEREDOC)
+		return (0);
+	return (1);
+}
+
 int	process_word(char *input, int *i, t_token **tokens)
 {
 	int		start;
 	int		in_quotes;
 	char	quote_type;
 	char	*word;
-	int		should_expand;
-	t_token	*last_token;
 
 	start = *i;
 	in_quotes = 0;
 	quote_type = 0;
-	last_token = *tokens;
-	while (last_token && last_token->next)
-		last_token = last_token->next;
-	should_expand = 1;
-	if (last_token && last_token->type == TOKEN_HEREDOC)
-		should_expand = 0;
 	while (input[*i])
 	{
 		handle_quotes(input[*i], &in_quotes, &quote_type);
@@ -74,7 +60,8 @@ int	process_word(char *input, int *i, t_token **tokens)
 			break ;
 		(*i)++;
 	}
-	word = extract_and_expand_word(input, start, *i, should_expand);
+	word = extract_and_expand_word(input,
+			start, *i, get_expansion_flag(tokens));
 	return (create_word_token(word, tokens));
 }
 

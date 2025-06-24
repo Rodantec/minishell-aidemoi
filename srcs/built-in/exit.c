@@ -10,9 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/exec.h"
 #include "../../includes/minishell.h"
-#include "../../includes/built_in.h"
 
 int	is_numeric(char *str)
 {

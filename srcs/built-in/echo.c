@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/exec.h"
+#include "../../includes/minishell.h"
 #include <stdio.h>
 
 int	is_n_option(char *arg)

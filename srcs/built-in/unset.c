@@ -10,8 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
-#include "../includes/built_in.h"
+#include "../../includes/minishell.h"
 
 void	remove_var(char **env, int *count, char *name)
 {

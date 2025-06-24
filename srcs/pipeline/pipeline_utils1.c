@@ -11,9 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
-#include "../../includes/exec.h"
-#include "../../includes/built_in.h"
-#include "../../includes/pipeline.h"
 
 void	close_pipes(int **pipes, int cmd_count)
 {
@@ -29,11 +26,10 @@ void	close_pipes(int **pipes, int cmd_count)
 			close(pipes[i][0]);
 			close(pipes[i][1]);
 			free(pipes[i]);
-			pipes[i] = NULL;  // Ajout de cette ligne
+			pipes[i] = NULL;
 		}
 		i++;
 	}
-	//free(pipes);
 }
 
 int	**init_pipe_array(int cmd_count)

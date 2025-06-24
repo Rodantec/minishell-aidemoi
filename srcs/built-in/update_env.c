@@ -10,8 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
-#include "../includes/built_in.h"
+#include "../../includes/minishell.h"
 
 int	replace_env_var(t_env *envp, int index, char *name, char *value)
 {
@@ -45,20 +44,24 @@ int	add_env_var(t_env *envp, char *name, char *value)
 	return (0);
 }
 
-char	*join_if_append(char *value, char *current)
+static int	process_var_names(char *var, char **name, char **value)
 {
-	char	*tmp;
-
-	if (current && value)
+	*name = get_var_name(var);
+	*value = get_var_value(var);
+	if (!*name)
 	{
-		tmp = ft_strjoin(current, value);
-		free(value);
-		free(current);
-		return (tmp);
+		if (*value)
+			free(*value);
+		return (1);
 	}
-	if (current)
-		return (current);
-	return (value);
+	return (0);
+}
+
+static void	cleanup_vars(char *name, char *value)
+{
+	free(name);
+	if (value)
+		free(value);
 }
 
 int	update_env_var(t_env *envp, char *var)
@@ -71,14 +74,8 @@ int	update_env_var(t_env *envp, char *var)
 
 	if (!envp || !var)
 		return (1);
-	name = get_var_name(var);
-	value = get_var_value(var);
-	if (!name)
-	{
-		if (value)
-			free(value);
+	if (process_var_names(var, &name, &value) != 0)
 		return (1);
-	}
 	index = find_env_var_index(envp->env, var);
 	if (has_plus_equals(var))
 	{
@@ -89,8 +86,6 @@ int	update_env_var(t_env *envp, char *var)
 		result = replace_env_var(envp, index, name, value);
 	else
 		result = add_env_var(envp, name, value);
-	free(name);
-	if (value)
-		free(value);
+	cleanup_vars(name, value);
 	return (result);
 }

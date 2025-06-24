@@ -10,8 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
-#include "../includes/built_in.h"
+#include "../../includes/minishell.h"
 
 int	replace_export_var(t_env *envp, int index, char *name, char *value)
 {
@@ -88,8 +87,7 @@ int	update_export_var(t_env *envp, char *var)
 		result = replace_export_var(envp, index, name, value);
 	else
 		result = add_export_var(envp, name, value);
-	
-	free(name); 
+	free(name);
 	free(value);
 	return (result);
 }

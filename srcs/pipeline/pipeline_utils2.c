@@ -11,9 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
-#include "../../includes/exec.h"
-#include "../../includes/built_in.h"
-#include "../../includes/pipeline.h"
 
 t_token	*create_command_token(t_command *cmd)
 {
@@ -33,22 +30,23 @@ t_token	*create_command_token(t_command *cmd)
 	return (token);
 }
 
-void	execute_external_command(t_command *cmd, t_env *envp, t_token *token, t_pipeline *pipeline, t_token *token_lexer)
+void	execute_external_command(t_command *cmd,
+	t_minishell *minishell, t_token *token)
 {
 	char	*path;
 
-	path = find_path(cmd->args[0], envp);
+	path = find_path(cmd->args[0], &minishell->env);
 	if (!path)
 	{
 		ft_putstr_fd("Command not found: ", STDERR_FILENO);
 		ft_putendl_fd(cmd->args[0], STDERR_FILENO);
 		free_tokens(&token);
-		free_tokens(&token_lexer);
-		free_env(envp);
-		free_pipeline(pipeline);
-		exit(127) ;
+		free_tokens(&minishell->tokens);
+		free_env(&minishell->env);
+		free_pipeline(&minishell->pipeline);
+		exit(127);
 	}
-	execve(path, cmd->args, envp->env);
+	execve(path, cmd->args, minishell->env.env);
 	free(path);
 	perror("execve");
 	exit(1);
@@ -65,55 +63,34 @@ void	setup_command_io(t_pipeline *pipeline, int cmd_index, int *saved_fds)
 	}
 }
 
-void	handle_builtin_execution(t_command *cmd, t_env *envp,
-	t_pipeline *pipeline, t_token *token, t_token *token_lexer)
+void	handle_builtin_execution(t_command *cmd,
+	t_minishell *minishell, t_token *token)
 {
 	int	builtin_result;
 
-	builtin_result = run_builtin(cmd->args, envp);
+	builtin_result = run_builtin(cmd->args, &minishell->env);
 	if (builtin_result != -1)
 	{
-		if (pipeline && pipeline->pipes)
-			close_pipes(pipeline->pipes, pipeline->cmd_count);
+		if (minishell->pipeline.pipes)
+			close_pipes(minishell->pipeline.pipes,
+				minishell->pipeline.cmd_count);
 		free(token->value);
 		free(token);
 		exit(builtin_result);
 	}
-	if (pipeline && pipeline->pipes)
-		close_pipes(pipeline->pipes, pipeline->cmd_count);
-	execute_external_command(cmd, envp, token, pipeline, token_lexer);
+	if (minishell->pipeline.pipes)
+		close_pipes(minishell->pipeline.pipes, minishell->pipeline.cmd_count);
+	execute_external_command(cmd, minishell, token);
 }
 
-void	execute_pipeline_command(t_command *cmd, int cmd_index,
-	t_pipeline *pipeline, t_env *envp, t_token *token_lexer)
+void	restore_fds_and_exit(int *saved_fds, t_minishell *minishell)
 {
-	t_token	*token;
-	int		saved_fds[2];
-
-	saved_fds[0] = dup(STDIN_FILENO);
-	saved_fds[1] = dup(STDOUT_FILENO);
-	setup_command_io(pipeline, cmd_index, saved_fds);
-	if (cmd->redirections && handle_redirections(cmd->redirections, envp, token_lexer, pipeline) == -1)
-	{
-		dup2(saved_fds[0], STDIN_FILENO);
-		dup2(saved_fds[1], STDOUT_FILENO);
-		close(saved_fds[0]);
-		close(saved_fds[1]);
-
-		if (pipeline && pipeline->pipes)
-			close_pipes(pipeline->pipes, pipeline->cmd_count);
-		exit(1);
-	}
+	dup2(saved_fds[0], STDIN_FILENO);
+	dup2(saved_fds[1], STDOUT_FILENO);
 	close(saved_fds[0]);
 	close(saved_fds[1]);
-	token = create_command_token(cmd);
-	if (!token)
-	{
-		if (pipeline && pipeline->pipes)
-			close_pipes(pipeline->pipes, pipeline->cmd_count);
-		exit(1);
-	}
-	handle_builtin_execution(cmd, envp, pipeline, token, token_lexer);
-	free_pipeline(pipeline);
-	free_cmd(cmd);
+	if (minishell->pipeline.pipes)
+		close_pipes(minishell->pipeline.pipes,
+			minishell->pipeline.cmd_count);
+	exit(1);
 }

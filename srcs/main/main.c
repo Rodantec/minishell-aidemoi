@@ -11,114 +11,89 @@
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-#include "../includes/built_in.h"
-#include "../includes/pipeline.h"
 
 t_global	g_global = {0};
 
-char	*prompt_and_read(void)
+static void	handle_redir_only(t_token *tokens, t_env *envp)
 {
-	char	*line;
-
-	g_global.signal_received = 0;
-	line = readline("minishell> ");
-	if (!line)
-	{
-		if (g_global.signal_received == SIGINT)
-		{
-			g_global.signal_received = 0;
-			return (ft_strdup(""));
-		}
-		if (g_global.shell_status == 0)
-		{
-			printf("exit\n");
-			exit(g_global.exit_status);
-		}
-		return (NULL);
-	}
-	if (line && *line)
-		add_history(line);
-	return (line);
-}
-
-void	execute_single_command(t_token *tokens, t_env *envp)
-{
-	int			result;
-	t_command	*cmd;
-	t_token		*current;
-	int			has_command;
-	int			saved_stdout;
-	int			saved_stdin;
-	char		*path; // Nouvelle variable pour vérifier le chemin
+	int	result;
+	int	saved_stdin;
+	int	saved_stdout;
 
 	result = 0;
-	current = tokens;
-	has_command = 0;
-	while (current && current->type != TOKEN_EOF)
-	{
-		if (current->type == TOKEN_WORD)
-		{
-			has_command = 1;
-			break ;
-		}
-		current = current->next;
-	}
-	if (!has_command)
-	{
-		if (contains_redirection(tokens) > 0)
-		{
-			saved_stdout = dup(STDOUT_FILENO);
-			saved_stdin = dup(STDIN_FILENO);
-			if (handle_redirections(tokens, envp, tokens, NULL) == 0)
-				result = 0;
-			else
-				result = 1;
-			dup2(saved_stdout, STDOUT_FILENO);
-			dup2(saved_stdin, STDIN_FILENO);
-			close(saved_stdout);
-			close(saved_stdin);
-		}
-		g_global.exit_status = result;
-		return ;
-	}
-	if (init_command(tokens, &cmd) < 0)
-		return ;
-	
-	// Nouvelle condition pour vérifier si la commande existe
+	saved_stdout = dup(STDOUT_FILENO);
+	saved_stdin = dup(STDIN_FILENO);
+	if (handle_redirections(tokens, envp, tokens, NULL) == 0)
+		result = 0;
+	else
+		result = 1;
+	dup2(saved_stdout, STDOUT_FILENO);
+	dup2(saved_stdin, STDIN_FILENO);
+	close(saved_stdout);
+	close(saved_stdin);
+	g_global.exit_status = result;
+}
+
+static int	check_and_handle_path(t_command *cmd, t_env *envp)
+{
+	char	*path;
+
 	if (!is_builtin(cmd->args[0]))
 	{
 		path = find_path(cmd->args[0], envp);
 		if (!path)
 		{
-			// La commande n'existe pas, libérer la mémoire et sortir
 			print_command_not_found(cmd->args[0]);
 			g_global.exit_status = 127;
 			free_array(cmd->args);
 			free(cmd);
-			return ;
+			return (0);
 		}
-		free(path); // Libérer le chemin trouvé
+		free(path);
 	}
-	
-	if (is_builtin(cmd->args[0]))
+	return (1);
+}
+
+static void	handle_builtin_cmd(t_token *tokens, t_command *cmd, t_env *envp)
+{
+	int	result;
+	int	saved_stdout;
+	int	saved_stdin;
+
+	if (contains_redirection(tokens) > 0)
+	{
+		saved_stdout = dup(STDOUT_FILENO);
+		saved_stdin = dup(STDIN_FILENO);
+		if (handle_redirections(tokens, envp, tokens, NULL) == 0)
+			result = run_builtin(cmd->args, envp);
+		else
+			result = 1;
+		dup2(saved_stdout, STDOUT_FILENO);
+		dup2(saved_stdin, STDIN_FILENO);
+		close(saved_stdout);
+		close(saved_stdin);
+	}
+	else
+		result = run_builtin(cmd->args, envp);
+	g_global.exit_status = result;
+}
+
+void	execute_single_command(t_token *tokens, t_env *envp)
+{
+	t_command	*cmd;
+
+	if (!find_command_token(tokens))
 	{
 		if (contains_redirection(tokens) > 0)
-		{
-			saved_stdout = dup(STDOUT_FILENO);
-			saved_stdin = dup(STDIN_FILENO);
-			if (handle_redirections(tokens, envp, tokens, NULL) == 0)
-				result = run_builtin(cmd->args, envp);
-			else
-				result = 1;
-			dup2(saved_stdout, STDOUT_FILENO);
-			dup2(saved_stdin, STDIN_FILENO);
-			close(saved_stdout);
-			close(saved_stdin);
-		}
-		else
-			result = run_builtin(cmd->args, envp);
-		g_global.exit_status = result;
+			handle_redir_only(tokens, envp);
+		return ;
 	}
+	if (init_command(tokens, &cmd) < 0)
+		return ;
+	if (!check_and_handle_path(cmd, envp))
+		return ;
+	if (is_builtin(cmd->args[0]))
+		handle_builtin_cmd(tokens, cmd, envp);
 	else
 	{
 		setup_child_signals();
@@ -127,91 +102,6 @@ void	execute_single_command(t_token *tokens, t_env *envp)
 	}
 	free_array(cmd->args);
 	free(cmd);
-}
-
-void	process_line(char *line, t_env *envp)
-{
-	t_token		*tokens;
-	t_pipeline	*pipeline;
-	t_token		*current;
-	int			has_command;
-	t_token		*temp;
-	int			saved_stdout;
-	int			saved_stdin;
-
-	tokens = NULL;
-	pipeline = NULL;
-	tokens = lexer(line);
-	if (!tokens)
-		return ;
-	if (check_syntax_errors(tokens) == -1)
-	{
-		free_tokens(&tokens);
-		return ;
-	}
-	current = tokens;
-	has_command = 0;
-	while (current && current->type != TOKEN_EOF)
-	{
-		if (current->type == TOKEN_WORD)
-		{
-			temp = tokens;
-			while (temp && temp->next != current)
-				temp = temp->next;
-			if (!temp || !is_redirection(temp))
-			{
-				has_command = 1;
-				break ;
-			}
-		}
-		current = current->next;
-	}
-	if (!has_command && contains_redirection(tokens) > 0)
-	{
-		saved_stdout = dup(STDOUT_FILENO);
-		saved_stdin = dup(STDIN_FILENO);
-		if (handle_redirections(tokens, envp, tokens, NULL) == 0)
-			g_global.exit_status = 0;
-		else
-			g_global.exit_status = 1;
-		dup2(saved_stdout, STDOUT_FILENO);
-		dup2(saved_stdin, STDIN_FILENO);
-		close(saved_stdout);
-		close(saved_stdin);
-		free_tokens(&tokens);
-		return ;
-	}
-	pipeline = create_pipeline(tokens);
-	if (!pipeline)
-	{
-		free_tokens(&tokens);
-		return ;
-	}
-	if (pipeline->cmd_count == 1)
-		execute_single_command(tokens, envp);
-	else
-	{
-		int	pipeline_result;
-
-		pipeline_result = execute_pipeline(pipeline, envp, tokens);
-		if (pipeline_result != -1)
-		{
-			g_global.exit_status = pipeline_result;
-		}
-	}
-	free_tokens(&tokens);
-	free_pipeline(pipeline);
-	if (g_global.shell_status == 1)
-		return ;
-}
-
-void	init_global(t_env *envp)
-{
-	g_global.env = envp;
-	g_global.shell_status = 0;
-	g_global.exit_status = 0;
-	g_global.signal_received = 0;
-	g_global.child_pid = 0;
 }
 
 int	main(int argc, char **argv, char **env)
@@ -241,6 +131,5 @@ int	main(int argc, char **argv, char **env)
 		}
 	}
 	rl_clear_history();
-	free_env(&envp);
-	return (0);
+	return (free_env(&envp), 0);
 }

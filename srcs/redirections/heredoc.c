@@ -44,11 +44,31 @@ int	is_delimiter(char *line, char *delimiter)
 	return (0);
 }
 
+static void	process_and_write_line(int fd, char *line,
+		int should_expand, t_env *envp)
+{
+	char	*expanded_line;
+
+	if (should_expand)
+	{
+		expanded_line = expand_variables(line, envp);
+		if (expanded_line)
+		{
+			ft_putendl_fd(expanded_line, fd);
+			if (expanded_line != line)
+				free(expanded_line);
+		}
+		else
+			ft_putendl_fd(line, fd);
+	}
+	else
+		ft_putendl_fd(line, fd);
+}
+
 void	write_heredoc_content(int fd, char *delimiter,
 		int should_expand, t_env *envp)
 {
 	char	*line;
-	char	*expanded_line;
 
 	while (1)
 	{
@@ -61,48 +81,7 @@ void	write_heredoc_content(int fd, char *delimiter,
 		}
 		if (is_delimiter(line, delimiter))
 			break ;
-		if (should_expand)
-		{
-			expanded_line = expand_variables(line, envp);
-			if (expanded_line)
-			{
-				ft_putendl_fd(expanded_line, fd);
-				if (expanded_line != line)
-					free(expanded_line);
-			}
-			else
-				ft_putendl_fd(line, fd);
-		}
-		else
-			ft_putendl_fd(line, fd);
+		process_and_write_line(fd, line, should_expand, envp);
 		free(line);
-	}
-}
-
-char	*handle_heredoc(char *delimiter, int should_expand, t_env *envp)
-{
-	char	*filename;
-	int		fd;
-
-	filename = create_heredoc_filename();
-	if (!filename)
-		return (NULL);
-	fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0600);
-	if (fd < 0)
-	{
-		free(filename);
-		return (NULL);
-	}
-	write_heredoc_content(fd, delimiter, should_expand, envp);
-	close(fd);
-	return (filename);
-}
-
-void	cleanup_heredoc(char *filename)
-{
-	if (filename)
-	{
-		unlink(filename);
-		free(filename);
 	}
 }

@@ -107,32 +107,11 @@ char	*expand_once(char *arg, t_env *envp)
 char	*expand(char *arg, t_env *envp)
 {
 	char	*result;
-	char	*dollar_pos;
-	char	*var_name;
-	char	*var_value;
-	char	*prefix;
-	char	*suffix;
-	char	*temp;
 
 	if (!arg || !envp)
 		return (ft_strdup(arg));
 	result = ft_strdup(arg);
 	if (!result)
 		return (NULL);
-	while ((dollar_pos = ft_strchr(result, '$')) != NULL)
-	{
-		var_name = extract_var_name(dollar_pos);
-		if (!var_name)
-			break;
-		var_value = get_env_value(var_name, envp);
-		prefix = ft_substr(result, 0, dollar_pos - result);
-		suffix = ft_strdup(dollar_pos + ft_strlen(var_name) + 1);
-		temp = handle_expansion(prefix, var_value, suffix);
-		free(var_name);
-		free(result);
-		result = temp;
-		if (!result)
-			break;
-	}
-	return (result);
+	return (expand_loop(result, envp));
 }

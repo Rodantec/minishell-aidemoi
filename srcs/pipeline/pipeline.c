@@ -11,9 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
-#include "../../includes/exec.h"
-#include "../../includes/built_in.h"
-#include "../../includes/pipeline.h"
 
 int	init_pipeline_execution(t_pipeline *pipeline, pid_t **pids)
 {
@@ -79,17 +76,20 @@ int	wait_for_children(t_pipeline *pipeline, pid_t *pids)
 	}
 	setup_interactive_signals();
 	g_global.shell_status = 0;
-	free(pids);
-	return (last_status);
+	return (free(pids), last_status);
 }
 
 int	execute_pipeline(t_pipeline *pipeline, t_env *envp, t_token *token_lexer)
 {
-	pid_t	*pids;
-	int		i;
+	pid_t		*pids;
+	int			i;
+	t_minishell	minishell;
 
 	if (init_pipeline_execution(pipeline, &pids) == -1)
 		return (-1);
+	minishell.env = *envp;
+	minishell.pipeline = *pipeline;
+	minishell.tokens = token_lexer;
 	i = 0;
 	while (i < pipeline->cmd_count)
 	{
@@ -99,13 +99,11 @@ int	execute_pipeline(t_pipeline *pipeline, t_env *envp, t_token *token_lexer)
 		if (pids[i] == 0)
 		{
 			free(pids);
-			execute_pipeline_command(pipeline->commands[i],
-				i, pipeline, envp, token_lexer);
+			execute_pipeline_command(pipeline->commands[i], i, &minishell);
 		}
 		i++;
 	}
 	if (pipeline->pipes)
 		close_pipes(pipeline->pipes, pipeline->cmd_count);
-	pipeline->pipes = NULL;
-	return (wait_for_children(pipeline, pids));
+	return (pipeline->pipes = NULL, wait_for_children(pipeline, pids));
 }

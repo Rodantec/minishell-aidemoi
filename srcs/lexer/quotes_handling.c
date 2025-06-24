@@ -12,6 +12,35 @@
 
 #include "../../includes/minishell.h"
 
+static int	process_quote_char(char c, char *quote_type, int *in_quotes)
+{
+	if (!*in_quotes)
+	{
+		*in_quotes = 1;
+		*quote_type = c;
+		return (1);
+	}
+	else if (c == *quote_type)
+	{
+		*in_quotes = 0;
+		*quote_type = 0;
+		return (1);
+	}
+	return (0);
+}
+
+static void	copy_char_if_needed(char *str, char *result, int i, int *j)
+{
+	result[(*j)++] = str[i];
+}
+
+static int	should_skip_quote(char c, char *quote_type, int *in_quotes)
+{
+	if (c == '\'' || c == '"')
+		return (process_quote_char(c, quote_type, in_quotes));
+	return (0);
+}
+
 char	*remove_quotes(char *str)
 {
 	int		i;
@@ -31,23 +60,8 @@ char	*remove_quotes(char *str)
 	quote_type = 0;
 	while (str[i])
 	{
-		if ((str[i] == '\'' || str[i] == '"'))
-		{
-			if (!in_quotes)
-			{
-				in_quotes = 1;
-				quote_type = str[i];
-			}
-			else if (str[i] == quote_type)
-			{
-				in_quotes = 0;
-				quote_type = 0;
-			}
-			else
-				result[j++] = str[i];
-		}
-		else
-			result[j++] = str[i];
+		if (!should_skip_quote(str[i], &quote_type, &in_quotes))
+			copy_char_if_needed(str, result, i, &j);
 		i++;
 	}
 	result[j] = '\0';
@@ -69,126 +83,4 @@ char	*finalize_expansion(char *new_str, char *temp_word, int j)
 	free(new_str);
 	free(suffix);
 	return (final);
-}
-
-int	find_var_end(char *str, int start)
-{
-	int	j;
-
-	j = start + 1;
-	if (str[j] == '?')
-		return (j + 1);
-	while (str[j] && (ft_isalnum(str[j]) || str[j] == '_'))
-		j++;
-	return (j);
-}
-
-char	*replace_variable(char *temp_word, int i, t_env *envp)
-{
-	char	*var_name;
-	char	*var_value;
-	char	*prefix;
-	char	*new_str;
-	int		j;
-
-	var_name = extract_var_name(temp_word + i);
-	if (!var_name)
-		return (ft_strdup(temp_word));
-	var_value = get_env_value(var_name, envp);
-	prefix = ft_substr(temp_word, 0, i);
-	if (!prefix)
-	{
-		free(var_name);
-		free(var_value);
-		return (NULL);
-	}
-	if (var_value)
-	{
-		new_str = ft_strjoin(prefix, var_value);
-		free(var_value);
-	}
-	else
-		new_str = ft_strdup(prefix);
-	free(prefix);
-	free(var_name);
-	if (!new_str)
-		return (NULL);
-	j = find_var_end(temp_word, i);
-	return (finalize_expansion(new_str, temp_word, j));
-}
-
-char	*expand_variables(char *temp_word, t_env *envp)
-{
-	int		i;
-	int		in_quotes;
-	char	quote_type;
-	char	*result;
-	char	*current;
-
-	current = temp_word;
-	while (1)
-	{
-		i = 0;
-		in_quotes = 0;
-		quote_type = 0;
-		while (current[i])
-		{
-			if ((current[i] == '\'' || current[i] == '"')
-				&& (!in_quotes || current[i] == quote_type))
-			{
-				if (in_quotes == 1)
-				{
-					in_quotes = 0;
-					quote_type = 0;
-				}
-				else
-				{
-					in_quotes = 1;
-					quote_type = current[i];
-				}
-			}
-			if (current[i] == '$' && quote_type != '\'')
-			{
-				if (current[i + 1] == '\0'
-					|| !(ft_isalnum(current[i + 1]) || current[i + 1] == '_'
-						|| current[i + 1] == '?'))
-				{
-					i++;
-					continue ;
-				}
-				result = replace_variable(current, i, envp);
-				if (!result)
-					return (NULL);
-				if (current != temp_word)
-					free(current);
-				current = result;
-				break ;
-			}
-			i++;
-		}
-		if (current[i] == '\0')
-			break ;
-	}
-	return (current);
-}
-
-char	*process_quotes_and_expand(char *word, t_env *envp)
-{
-	char	*temp_word;
-	char	*expanded;
-	char	*result;
-
-	if (!word)
-		return (NULL);
-	temp_word = ft_strdup(word);
-	if (!temp_word)
-		return (NULL);
-	expanded = expand_variables(temp_word, envp);
-	if (expanded != temp_word)
-		free(temp_word);
-	if (!expanded)
-		return (NULL);
-	result = remove_quotes(expanded);
-	free(expanded);
-	return (result);
 }

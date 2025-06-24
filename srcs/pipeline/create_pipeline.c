@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
-#include "../../includes/pipeline.h"
 
 t_token	*create_redirection_pair(t_token *current, t_token **head,
 	t_token **tail)

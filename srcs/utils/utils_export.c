@@ -10,8 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
-#include "../includes/built_in.h"
+#include "../../includes/minishell.h"
 
 int	print_invalid_identifier(char *str)
 {

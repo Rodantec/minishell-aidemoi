@@ -10,8 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/built_in.h"
-#include "../../includes/exec.h"
 #include "../../includes/minishell.h"
 
 int	update_pwd_vars(t_env *envp, char *oldpwd, char *pwd)
@@ -37,6 +35,16 @@ int	update_pwd_vars(t_env *envp, char *oldpwd, char *pwd)
 	return (status);
 }
 
+static int	change_directory(char *target_dir)
+{
+	if (!target_dir || ft_strcmp(target_dir, "--") == 0)
+		return (chdir(getenv("HOME")));
+	else if (ft_strcmp(target_dir, "-") == 0)
+		return (chdir(getenv("OLDPWD")));
+	else
+		return (chdir(target_dir));
+}
+
 int	cd(char **args, t_env *envp)
 {
 	char	*oldpwd;
@@ -47,24 +55,12 @@ int	cd(char **args, t_env *envp)
 	while (args[arg_count])
 		arg_count++;
 	if (arg_count > 2)
-	{
-		ft_putendl_fd("minishell: cd: too many arguments", STDERR_FILENO);
-		return (1);
-	}
+		return (ft_putendl_fd("minishell: cd: too many arguments",
+				STDERR_FILENO), 1);
 	oldpwd = getcwd(NULL, 0);
 	if (!oldpwd)
 		return (1);
-	if (!args[1] || ft_strcmp(args[1], "--") == 0)
-	{
-		if (chdir(getenv("HOME")) != 0)
-			return (perror("cd"), free(oldpwd), 1);
-	}
-	else if (ft_strcmp(args[1], "-") == 0)
-	{
-		if (chdir(getenv("OLDPWD")) != 0)
-			return (perror("cd"), free(oldpwd), 1);
-	}
-	else if (chdir(args[1]) != 0)
+	if (change_directory(args[1]) != 0)
 		return (perror("cd"), free(oldpwd), 1);
 	pwd = getcwd(NULL, 0);
 	if (!pwd)

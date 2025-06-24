@@ -10,22 +10,20 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/exec.h"
 #include "../../includes/minishell.h"
-#include "../../includes/built_in.h"
 
-char	**get_path_cut(t_env *env)
+static char	*check_absolute_path(char *cmd)
 {
-	int		i;
-	char	**pathcut;
-
-	i = 0;
-	while (env->env[i] && ft_strnstr(env->env[i], "PATH=", 5) == NULL)
-		i++;
-	if (!env->env[i])
+	if (ft_strchr(cmd, '/'))
+	{
+		if (access(cmd, F_OK) == 0)
+		{
+			if (access(cmd, X_OK) == 0)
+				return (ft_strdup(cmd));
+		}
 		return (NULL);
-	pathcut = ft_split(env->env[i] + 5, ':');
-	return (pathcut);
+	}
+	return (NULL);
 }
 
 char	*try_paths(char **pathcut, char *cmd)
@@ -33,18 +31,12 @@ char	*try_paths(char **pathcut, char *cmd)
 	int		i;
 	char	*temp;
 	char	*full_path;
+	char	*abs_path;
 
+	abs_path = check_absolute_path(cmd);
+	if (abs_path)
+		return (abs_path);
 	i = 0;
-	if (ft_strchr(cmd, '/'))
-	{
-		if (access(cmd, F_OK) == 0)
-		{
-			if (access(cmd, X_OK) == 0)
-				return (ft_strdup(cmd));
-			return (NULL);
-		}
-		return (NULL);
-	}
 	while (pathcut[i])
 	{
 		temp = ft_strjoin(pathcut[i], "/");
@@ -117,7 +109,8 @@ void	execute_cmd(t_token *token, t_env *env)
 	{
 		if (ft_strchr(args[0], '/'))
 		{
-			fprintf(stderr, "minishell: %s: No such file or directory\n", args[0]);
+			fprintf(stderr,
+				"minishell: %s: No such file or directory\n", args[0]);
 			g_global.exit_status = 127;
 		}
 		else

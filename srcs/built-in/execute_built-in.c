@@ -10,7 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../includes/built_in.h"
 #include "../../includes/minishell.h"
 
 int	run_builtin(char **args, t_env *envp)
@@ -88,18 +87,14 @@ int	execute_builtin(t_token *token, t_env *envp)
 	if (init_command(token, &cmd) < 0)
 		return (-1);
 	if (save_std_fds(&saved_stdout, &saved_stdin) < 0)
-	{
-		free(cmd);
-		return (-1);
-	}
+		return (free(cmd), -1);
 	if (contains_redirection(token) > 0)
 	{
 		if (handle_redirections(token, envp, token, NULL) < 0)
 		{
 			restore_fds(saved_stdout, saved_stdin);
 			free_array(cmd->args);
-			free(cmd);
-			return (1);
+			return (free(cmd), 1);
 		}
 	}
 	result = run_builtin(cmd->args, envp);
@@ -107,25 +102,4 @@ int	execute_builtin(t_token *token, t_env *envp)
 	free_array(cmd->args);
 	free(cmd);
 	return (result);
-}
-
-int	is_builtin(char *cmd)
-{
-	if (!cmd)
-		return (0);
-	if (ft_strcmp(cmd, "cd") == 0)
-		return (1);
-	if (ft_strcmp(cmd, "pwd") == 0)
-		return (1);
-	if (ft_strcmp(cmd, "env") == 0)
-		return (1);
-	if (ft_strcmp(cmd, "export") == 0)
-		return (1);
-	if (ft_strcmp(cmd, "unset") == 0)
-		return (1);
-	if (ft_strcmp(cmd, "exit") == 0)
-		return (1);
-	if (ft_strcmp(cmd, "echo") == 0)
-		return (1);
-	return (0);
 }

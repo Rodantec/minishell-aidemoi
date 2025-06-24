@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
-#include "../../includes/pipeline.h"
 
 void	free_env(t_env *env)
 {
@@ -84,48 +83,5 @@ void	free_token_list(t_token *tokens)
 			free(current->value);
 		free(current);
 		current = next;
-	}
-}
-
-void	free_pipeline(t_pipeline *pipeline)
-{
-	int	i;
-
-	if (!pipeline)
-		return ;
-	if (pipeline->commands)
-	{
-		i = 0;
-		while (i < pipeline->cmd_count)
-		{
-			if (pipeline->commands[i])
-			{
-				if (pipeline->commands[i]->redirections)
-					free_token_list(pipeline->commands[i]->redirections);
-				free_cmd(pipeline->commands[i]);
-			}
-			i++;
-		}
-		free(pipeline->commands);
-	}
-	if (pipeline->pipes)
-	{
-		// Ne pas appeler close_pipes ici car il a déjà été appelé
-		// close_pipes(pipeline->pipes, pipeline->cmd_count);
-		free(pipeline->pipes);
-		pipeline->pipes = NULL;
-	}
-	 free(pipeline);
-}
-
-void	cleanup_minishell(void)
-{
-	rl_clear_history();
-	if (g_global.env)
-	{
-		if (g_global.env->env)
-			free_array(g_global.env->env);
-		if (g_global.env->export)
-			free_array(g_global.env->export);
 	}
 }
