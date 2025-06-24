@@ -110,10 +110,12 @@ void	free_pipeline(t_pipeline *pipeline)
 	}
 	if (pipeline->pipes)
 	{
-		close_pipes(pipeline->pipes, pipeline->cmd_count);
+		// Ne pas appeler close_pipes ici car il a déjà été appelé
+		// close_pipes(pipeline->pipes, pipeline->cmd_count);
 		free(pipeline->pipes);
+		pipeline->pipes = NULL;
 	}
-	free(pipeline);
+	 free(pipeline);
 }
 
 void	cleanup_minishell(void)

@@ -82,6 +82,7 @@ t_command	*init_single_command(t_token *cmd_start)
 	if (!copy_command_args_only(cmd, cmd_start))
 	{
 		free(cmd);
+		ft_putstr_fd("bite: ", STDERR_FILENO);
 		return (NULL);
 	}
 	cmd->redirections = extract_command_redirections(cmd_start);

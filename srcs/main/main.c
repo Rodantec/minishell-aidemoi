@@ -69,7 +69,7 @@ void	execute_single_command(t_token *tokens, t_env *envp)
 		{
 			saved_stdout = dup(STDOUT_FILENO);
 			saved_stdin = dup(STDIN_FILENO);
-			if (handle_redirections(tokens) == 0)
+			if (handle_redirections(tokens, envp, tokens, NULL) == 0)
 				result = 0;
 			else
 				result = 1;
@@ -106,7 +106,7 @@ void	execute_single_command(t_token *tokens, t_env *envp)
 		{
 			saved_stdout = dup(STDOUT_FILENO);
 			saved_stdin = dup(STDIN_FILENO);
-			if (handle_redirections(tokens) == 0)
+			if (handle_redirections(tokens, envp, tokens, NULL) == 0)
 				result = run_builtin(cmd->args, envp);
 			else
 				result = 1;
@@ -170,7 +170,7 @@ void	process_line(char *line, t_env *envp)
 	{
 		saved_stdout = dup(STDOUT_FILENO);
 		saved_stdin = dup(STDIN_FILENO);
-		if (handle_redirections(tokens) == 0)
+		if (handle_redirections(tokens, envp, tokens, NULL) == 0)
 			g_global.exit_status = 0;
 		else
 			g_global.exit_status = 1;

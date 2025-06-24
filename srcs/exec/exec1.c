@@ -21,7 +21,7 @@ void	run_child_process(t_token *token, t_env *env)
 	redirection_count = contains_redirection(token);
 	if (redirection_count > 0)
 	{
-		if (handle_redirections(token) < 0)
+		if (handle_redirections(token, env, token, NULL) < 0)
 			exit(1);
 	}
 	execute_cmd(token, env);

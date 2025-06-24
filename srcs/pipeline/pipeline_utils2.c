@@ -42,7 +42,6 @@ void	execute_external_command(t_command *cmd, t_env *envp, t_token *token, t_pip
 	{
 		ft_putstr_fd("Command not found: ", STDERR_FILENO);
 		ft_putendl_fd(cmd->args[0], STDERR_FILENO);
-		free_cmd(cmd);
 		free_tokens(&token);
 		free_tokens(&token_lexer);
 		free_env(envp);
@@ -94,12 +93,13 @@ void	execute_pipeline_command(t_command *cmd, int cmd_index,
 	saved_fds[0] = dup(STDIN_FILENO);
 	saved_fds[1] = dup(STDOUT_FILENO);
 	setup_command_io(pipeline, cmd_index, saved_fds);
-	if (cmd->redirections && handle_redirections(cmd->redirections) == -1)
+	if (cmd->redirections && handle_redirections(cmd->redirections, envp, token_lexer, pipeline) == -1)
 	{
 		dup2(saved_fds[0], STDIN_FILENO);
 		dup2(saved_fds[1], STDOUT_FILENO);
 		close(saved_fds[0]);
 		close(saved_fds[1]);
+
 		if (pipeline && pipeline->pipes)
 			close_pipes(pipeline->pipes, pipeline->cmd_count);
 		exit(1);

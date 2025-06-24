@@ -108,7 +108,7 @@ int	handle_heredoc_redirect(t_token *token)
 	return (result);
 }
 
-int	apply_single_redirection(t_token *token)
+int	apply_single_redirection(t_token *token, t_env *env, t_token *token_lexer, t_pipeline *pipeline)
 {
 	if (!token || !token->next || token->next->type != TOKEN_WORD)
 		return (-1);
@@ -117,7 +117,19 @@ int	apply_single_redirection(t_token *token)
 	if (token->type == TOKEN_APPEND)
 		return (redirect_output_append(token->next->value));
 	if (token->type == TOKEN_REDIR_IN)
-		return (redirect_input(token->next->value));
+	{
+		if (redirect_input(token->next->value) < 0)
+		{
+			ft_putstr_fd("No such file or directory: ", STDERR_FILENO);
+			ft_putendl_fd(token->next->value, STDERR_FILENO);
+			free_tokens(&token);
+			free_tokens(&token_lexer);
+			free_env(env);
+			free_pipeline(pipeline);
+			return (-1);
+		}
+		return (0);
+	}
 	if (token->type == TOKEN_HEREDOC)
 		return (handle_heredoc_redirect(token));
 	return (0);
