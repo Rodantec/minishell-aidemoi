@@ -24,8 +24,7 @@ t_token	*create_redirection_pair(t_token *current, t_token **head,
 	new_file = create_token(current->next->type, current->next->value);
 	if (!new_file)
 	{
-		free(new_redir->value);
-		free(new_redir);
+		free_tokens(&new_redir);
 		return (*head);
 	}
 	new_redir->next = new_file;

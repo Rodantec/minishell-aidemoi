@@ -39,7 +39,7 @@ void	free_tokens(t_token **tokens)
 		free(current);
 		current = next;
 	}
-	*tokens = NULL;
+	 *tokens = NULL;
 }
 
 void	free_cmd(t_command *cmd)

@@ -90,6 +90,7 @@ int	contains_redirection(t_token *tokens)
 
 int	handle_redirections(t_token *token, t_env *env,
 	t_token *token_lexer, t_pipeline *pipeline)
+
 {
 	int		stdin_backup;
 	int		stdout_backup;

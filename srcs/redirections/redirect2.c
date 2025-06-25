@@ -43,10 +43,9 @@ int	apply_single_redirection(t_token *token, t_env *env,
 	{
 		if (redirect_input(token->next->value) < 0)
 		{
-			free_tokens(&token);
-			free_tokens(&token_lexer);
-			free_env(env);
-			free_pipeline(pipeline);
+		free_tokens(&token_lexer); // ← si nécessaire
+		free_env(env);
+		free_pipeline(pipeline);
 			return (-1);
 		}
 		return (0);
