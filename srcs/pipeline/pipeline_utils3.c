@@ -14,9 +14,9 @@
 
 static void	cleanup_and_exit(t_minishell *minishell)
 {
-	if (minishell->pipeline.pipes)
-		close_pipes(minishell->pipeline.pipes,
-			minishell->pipeline.cmd_count);
+	if (minishell->pipeline->pipes)
+		close_pipes(minishell->pipeline->pipes,
+			minishell->pipeline->cmd_count);
 	exit(1);
 }
 
@@ -28,9 +28,9 @@ void	execute_pipeline_command(t_command *cmd,
 
 	saved_fds[0] = dup(STDIN_FILENO);
 	saved_fds[1] = dup(STDOUT_FILENO);
-	setup_command_io(&minishell->pipeline, cmd_index, saved_fds);
+	setup_command_io(minishell->pipeline, cmd_index, saved_fds);
 	if (cmd->redirections && handle_redirections(cmd->redirections,
-			&minishell->env, minishell->tokens, &minishell->pipeline) == -1)
+			&minishell->env, minishell->tokens, minishell->pipeline) == -1)
 		restore_fds_and_exit(saved_fds, minishell);
 	close(saved_fds[0]);
 	close(saved_fds[1]);
@@ -38,6 +38,6 @@ void	execute_pipeline_command(t_command *cmd,
 	if (!token)
 		cleanup_and_exit(minishell);
 	handle_builtin_execution(cmd, minishell, token);
-	free_pipeline(&minishell->pipeline);
+	free_pipeline(minishell->pipeline);
 	free_cmd(cmd);
 }

@@ -30,6 +30,7 @@ void	close_pipes(int **pipes, int cmd_count)
 		}
 		i++;
 	}
+	free(pipes);
 }
 
 int	**init_pipe_array(int cmd_count)

@@ -43,7 +43,7 @@ void	execute_external_command(t_command *cmd,
 		free_tokens(&token);
 		free_tokens(&minishell->tokens);
 		free_env(&minishell->env);
-		free_pipeline(&minishell->pipeline);
+		free_pipeline(minishell->pipeline);
 		exit(127);
 	}
 	execve(path, cmd->args, minishell->env.env);
@@ -71,15 +71,15 @@ void	handle_builtin_execution(t_command *cmd,
 	builtin_result = run_builtin(cmd->args, &minishell->env);
 	if (builtin_result != -1)
 	{
-		if (minishell->pipeline.pipes)
-			close_pipes(minishell->pipeline.pipes,
-				minishell->pipeline.cmd_count);
+		if (minishell->pipeline->pipes)
+			close_pipes(minishell->pipeline->pipes,
+				minishell->pipeline->cmd_count);
 		free(token->value);
 		free(token);
 		exit(builtin_result);
 	}
-	if (minishell->pipeline.pipes)
-		close_pipes(minishell->pipeline.pipes, minishell->pipeline.cmd_count);
+	if (minishell->pipeline->pipes)
+		close_pipes(minishell->pipeline->pipes, minishell->pipeline->cmd_count);
 	execute_external_command(cmd, minishell, token);
 }
 
@@ -89,8 +89,8 @@ void	restore_fds_and_exit(int *saved_fds, t_minishell *minishell)
 	dup2(saved_fds[1], STDOUT_FILENO);
 	close(saved_fds[0]);
 	close(saved_fds[1]);
-	if (minishell->pipeline.pipes)
-		close_pipes(minishell->pipeline.pipes,
-			minishell->pipeline.cmd_count);
+	if (minishell->pipeline->pipes)
+		close_pipes(minishell->pipeline->pipes,
+			minishell->pipeline->cmd_count);
 	exit(1);
 }

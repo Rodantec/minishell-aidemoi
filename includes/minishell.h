@@ -87,7 +87,7 @@ typedef struct s_minishell
 	t_token			*tokens;			/* Liste des tokens */
 	t_env			env;				/* Environnement */
 	t_command		**commands;			/* Commandes */
-	t_pipeline		pipeline;			/* Pipeline */
+	t_pipeline		*pipeline;			/* Pipeline */
 	t_parse_context	parse_ctx;			/* Contexte de parsing */
 }	t_minishell;
 

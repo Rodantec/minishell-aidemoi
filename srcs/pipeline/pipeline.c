@@ -88,7 +88,7 @@ int	execute_pipeline(t_pipeline *pipeline, t_env *envp, t_token *token_lexer)
 	if (init_pipeline_execution(pipeline, &pids) == -1)
 		return (-1);
 	minishell.env = *envp;
-	minishell.pipeline = *pipeline;
+	minishell.pipeline = pipeline;
 	minishell.tokens = token_lexer;
 	i = 0;
 	while (i < pipeline->cmd_count)
