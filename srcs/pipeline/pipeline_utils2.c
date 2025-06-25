@@ -75,6 +75,12 @@ void	handle_builtin_execution(t_command *cmd,
 			close_pipes(minishell->pipeline->pipes,
 				minishell->pipeline->cmd_count);
 	//	printf("iciiiiiiiiiiiii");
+		free(token->value);
+		free(token);
+		// Ajouter la libération complète avant exit
+		free_tokens(&minishell->tokens);
+		free_env(&minishell->env);
+		free_pipeline(minishell->pipeline);
 		exit(builtin_result);
 	}
 	if (minishell->pipeline->pipes)
