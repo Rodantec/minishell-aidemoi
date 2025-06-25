@@ -76,6 +76,12 @@ void	handle_builtin_execution(t_command *cmd,
 				minishell->pipeline->cmd_count);
 		free(token->value);
 		free(token);
+		ft_putstr_fd("Command not found: ", STDERR_FILENO);
+		ft_putendl_fd(cmd->args[0], STDERR_FILENO);
+		free_tokens(&token);
+		free_tokens(&minishell->tokens);
+		free_env(&minishell->env);
+		free_pipeline(minishell->pipeline);
 		exit(builtin_result);
 	}
 	if (minishell->pipeline->pipes)
