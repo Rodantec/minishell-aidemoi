@@ -33,11 +33,12 @@ void	free_pipeline(t_pipeline *pipeline)
 		}
 		free(pipeline->commands);
 	}
-	if (pipeline->pipes)
-	{
-		free(pipeline->pipes);
-		pipeline->pipes = NULL;
-	}
+	// SUPPRIMER cette section qui cause le double free
+	// if (pipeline->pipes)
+	// {
+	//     free(pipeline->pipes);
+	//     pipeline->pipes = NULL;
+	// }
 	free(pipeline);
 }
 

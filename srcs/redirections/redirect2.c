@@ -43,8 +43,6 @@ int	apply_single_redirection(t_token *token, t_env *env,
 	{
 		if (redirect_input(token->next->value) < 0)
 		{
-			ft_putstr_fd("No such file or directory: ", STDERR_FILENO);
-			ft_putendl_fd(token->next->value, STDERR_FILENO);
 			free_tokens(&token);
 			free_tokens(&token_lexer);
 			free_env(env);
