@@ -56,7 +56,7 @@ static int	process_pipeline(t_pipeline *pipeline, t_env *envp, t_token *tokens)
 	int	pipeline_result;
 
 	if (pipeline->cmd_count == 1)
-		execute_single_command(tokens, envp);
+		execute_single_command(tokens, envp,pipeline);
 	else
 	{
 		pipeline_result = execute_pipeline(pipeline, envp, tokens);

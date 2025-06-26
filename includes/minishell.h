@@ -242,7 +242,8 @@ int				init_export_vars(t_env *envp, int i);
 
 char			**get_path_cut(t_env *env);
 char			*find_path(char *cmd, t_env *env);
-void			first_child(t_token *token, t_env *env);
+void			first_child(t_token *token, t_env *env,t_command *cmd,t_pipeline *pipeline);
+
 void			free_array(char **array);
 
 /* ========================================================================== */
@@ -300,7 +301,8 @@ void			setup_command_io(t_pipeline *pipeline,
 					int cmd_index, int *saved_fds);
 void			init_global(t_env *envp);
 int				process_line(char *line, t_env *envp);
-void			execute_single_command(t_token *tokens, t_env *envp);
+void			execute_single_command(t_token *tokens, t_env *envp,t_pipeline *pipeline);
+
 int				find_command_token(t_token *tokens);
 char			*prompt_and_read(void);
 char			*process_dollar_sign(char *current, int i, t_env *envp);

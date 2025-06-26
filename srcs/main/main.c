@@ -14,7 +14,7 @@
 
 t_global	g_global = {0};
 
-static void	handle_redir_only(t_token *tokens, t_env *envp)
+void	handle_redir_only(t_token *tokens, t_env *envp)
 {
 	int	result;
 	int	saved_stdin;
@@ -34,7 +34,7 @@ static void	handle_redir_only(t_token *tokens, t_env *envp)
 	g_global.exit_status = result;
 }
 
-static int	check_and_handle_path(t_command *cmd, t_env *envp)
+int	check_and_handle_path(t_command *cmd, t_env *envp)
 {
 	char	*path;
 
@@ -54,7 +54,7 @@ static int	check_and_handle_path(t_command *cmd, t_env *envp)
 	return (1);
 }
 
-static void	handle_builtin_cmd(t_token *tokens, t_command *cmd, t_env *envp)
+void	handle_builtin_cmd(t_token *tokens, t_command *cmd, t_env *envp)
 {
 	int	result;
 	int	saved_stdout;
@@ -78,7 +78,8 @@ static void	handle_builtin_cmd(t_token *tokens, t_command *cmd, t_env *envp)
 	g_global.exit_status = result;
 }
 
-void	execute_single_command(t_token *tokens, t_env *envp)
+void	execute_single_command(t_token *tokens, t_env *envp,t_pipeline *pipeline)
+
 {
 	t_command	*cmd;
 
@@ -97,7 +98,7 @@ void	execute_single_command(t_token *tokens, t_env *envp)
 	else
 	{
 		setup_child_signals();
-		first_child(tokens, envp);
+		first_child(tokens, envp, cmd, pipeline);
 		setup_interactive_signals();
 	}
 	free_array(cmd->args);

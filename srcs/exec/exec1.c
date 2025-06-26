@@ -12,7 +12,7 @@
 
 #include "../../includes/minishell.h"
 
-void	run_child_process(t_token *token, t_env *env)
+void	run_child_process(t_token *token, t_env *env, t_command *cmd, t_pipeline *pipeline)
 {
 	int	redirection_count;
 
@@ -21,7 +21,12 @@ void	run_child_process(t_token *token, t_env *env)
 	if (redirection_count > 0)
 	{
 		if (handle_redirections(token, env, token, NULL) < 0)
+		{
+			printf("aled");
+			free_pipeline(pipeline);
+			free_cmd(cmd);
 			exit(1);
+		}
 	}
 	execute_cmd(token, env);
 	perror("Error");
@@ -46,7 +51,7 @@ static void	process_child_status(int status, pid_t pid)
 		g_global.exit_status = WEXITSTATUS(status);
 }
 
-void	first_child(t_token *token, t_env *env)
+void	first_child(t_token *token, t_env *env, t_command *cmd, t_pipeline *pipeline)
 {
 	pid_t	pid;
 	int		status;
@@ -58,7 +63,7 @@ void	first_child(t_token *token, t_env *env)
 		exit(1);
 	}
 	if (pid == 0)
-		run_child_process(token, env);
+		run_child_process(token, env, cmd, pipeline);
 	g_global.child_pid = pid;
 	g_global.shell_status = 1;
 	setup_execution_signals();
