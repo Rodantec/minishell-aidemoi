@@ -44,13 +44,11 @@ int	apply_single_redirection(t_token *token, t_env *env,
 	{
 		if (redirect_input(token->next->value) < 0)
 		{
-			if(token_lexer)
+			if (token_lexer)
 				free_tokens(&token_lexer);
-			if(env)
+			if (env)
 				free_env(env);
-			if(pipeline)
-				free_pipeline(pipeline);
-			return -1;
+			return (-1);
 		}
 		return (0);
 	}

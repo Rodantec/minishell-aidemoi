@@ -12,7 +12,6 @@
 
 #include "../../includes/minishell.h"
 
-
 void	free_env(t_env *env)
 {
 	if (!env)
@@ -40,7 +39,7 @@ void	free_tokens(t_token **tokens)
 		free(current);
 		current = next;
 	}
-	 *tokens = NULL;
+	*tokens = NULL;
 }
 
 void	free_cmd(t_command *cmd)

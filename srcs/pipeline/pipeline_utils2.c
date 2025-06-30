@@ -93,7 +93,10 @@ void	restore_fds_and_exit(int *saved_fds, t_minishell *minishell)
 	close(saved_fds[0]);
 	close(saved_fds[1]);
 	if (minishell->pipeline->pipes)
+	{	
 		close_pipes(minishell->pipeline->pipes,
 			minishell->pipeline->cmd_count);
+		free_pipeline(minishell->pipeline);
+	}
 	exit(1);
 }
