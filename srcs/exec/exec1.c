@@ -22,7 +22,6 @@ void	run_child_process(t_token *token, t_env *env, t_command *cmd, t_pipeline *p
 	{
 		if (handle_redirections(token, env, token, NULL) < 0)
 		{
-			printf("aled");
 			free_pipeline(pipeline);
 			free_cmd(cmd);
 			exit(1);

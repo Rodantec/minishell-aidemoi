@@ -92,8 +92,8 @@ int	execute_builtin(t_token *token, t_env *envp)
 	{
 		if (handle_redirections(token, envp, token, NULL) < 0)
 		{
-			restore_fds(saved_stdout, saved_stdin);
 			free_array(cmd->args);
+			restore_fds(saved_stdout, saved_stdin);
 			return (free(cmd), 1);
 		}
 	}

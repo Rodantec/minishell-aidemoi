@@ -119,7 +119,6 @@ typedef struct s_dollar_context
 /* ========================================================================== */
 /*                            FONCTIONS LEXER                               */
 /* ========================================================================== */
-
 t_token			*lexer(char *input);
 t_token			*create_token(t_token_type type, char *value);
 void			add_token(t_token **head, t_token *new_token);

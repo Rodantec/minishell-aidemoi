@@ -78,29 +78,34 @@ void	handle_builtin_cmd(t_token *tokens, t_command *cmd, t_env *envp)
 	g_global.exit_status = result;
 }
 
-void	execute_single_command(t_token *tokens, t_env *envp,t_pipeline *pipeline)
-
+void	execute_single_command(t_token *tokens, t_env *envp, t_pipeline *pipeline)
 {
 	t_command	*cmd;
 
-	if (!find_command_token(tokens))
-	{
-		if (contains_redirection(tokens) > 0)
-			handle_redir_only(tokens, envp);
-		return ;
-	}
 	if (init_command(tokens, &cmd) < 0)
 		return ;
 	if (!check_and_handle_path(cmd, envp))
 		return ;
+	
 	if (is_builtin(cmd->args[0]))
-		handle_builtin_cmd(tokens, cmd, envp);
+	{
+		// Si builtin avec redirections, utiliser un processus enfant
+		if (contains_redirection(tokens) > 0)
+		{
+			setup_child_signals();
+			first_child(tokens, envp, cmd, pipeline);
+			setup_interactive_signals();
+		}
+		else
+			handle_builtin_cmd(tokens, cmd, envp);
+	}
 	else
 	{
 		setup_child_signals();
 		first_child(tokens, envp, cmd, pipeline);
 		setup_interactive_signals();
 	}
+	
 	free_array(cmd->args);
 	free(cmd);
 }

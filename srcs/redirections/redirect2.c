@@ -33,6 +33,7 @@ int	handle_heredoc_redirect(t_token *token)
 int	apply_single_redirection(t_token *token, t_env *env,
 	t_token *token_lexer, t_pipeline *pipeline)
 {
+	(void)pipeline;
 	if (!token || !token->next || token->next->type != TOKEN_WORD)
 		return (-1);
 	if (token->type == TOKEN_REDIR_OUT)
@@ -43,10 +44,13 @@ int	apply_single_redirection(t_token *token, t_env *env,
 	{
 		if (redirect_input(token->next->value) < 0)
 		{
-		free_tokens(&token_lexer); // ← si nécessaire
-		free_env(env);
-		free_pipeline(pipeline);
-			return (-1);
+			if(token_lexer)
+				free_tokens(&token_lexer);
+			if(env)
+				free_env(env);
+			if(pipeline)
+				free_pipeline(pipeline);
+			return -1;
 		}
 		return (0);
 	}
